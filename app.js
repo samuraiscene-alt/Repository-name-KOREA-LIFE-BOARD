@@ -1291,7 +1291,7 @@ function ensureDiceEngine() {
   }
   if (diceEngineInitPromise) return diceEngineInitPromise;
 
-  rollButton.disabled = true;
+  updateTurnControls();
   statusPill.textContent = diceEngineRetryCount > 0
     ? `3D 주사위 엔진 재연결 중… (${diceEngineRetryCount}/${DICE_ENGINE_MAX_RETRIES})`
     : '3D 주사위 엔진 준비 중…';
@@ -1314,11 +1314,11 @@ function ensureDiceEngine() {
       updateTurnControls();
 
       if (diceEngineRetryCount <= DICE_ENGINE_MAX_RETRIES) {
-        statusPill.textContent = '3D 주사위 엔진 연결을 다시 시도합니다…';
+        statusPill.textContent = '3D 주사위 연결 재시도 중 · 주사위 버튼은 안전모드로 사용 가능';
         clearTimeout(diceEngineRetryTimer);
         diceEngineRetryTimer = window.setTimeout(() => ensureDiceEngine(), 900 * diceEngineRetryCount);
       } else {
-        statusPill.textContent = '3D 주사위 준비에 실패했습니다. 화면을 다시 열면 자동으로 재시도합니다.';
+        statusPill.textContent = '3D 주사위 준비 실패 · 2D 안전모드로 계속 플레이할 수 있습니다.';
       }
       return false;
     });
