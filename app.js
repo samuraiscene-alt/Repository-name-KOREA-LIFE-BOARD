@@ -1178,7 +1178,7 @@ function updateTurnControls() {
   const label = rollButton.querySelector('span:last-child');
   const isAI = Boolean(state.current?.isAI);
   const retired = Boolean(state.current?.retired);
-  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V57';
+  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V58';
   rollButton.disabled = state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
   if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rollStarting || state.rolling || state.moving || isAI || hasBlockingDecision();
 }
@@ -5334,12 +5334,13 @@ newGameButton?.addEventListener('click', startNewGameFromLaunch);
 // V57: iOS touch probe + direct fallback.
 // Run the logic-only dice path first so rolling never depends on WebGL/Rapier.
 rollButton.removeAttribute('onclick');
-const handleRollTap = (event) => {
-  event.preventDefault();
-  statusPill.textContent = 'V57 · 주사위 입력 감지';
-  rollDiceFallback(false);
+// V58: inline HTML owns the click so we can isolate iOS input from module execution.
+window.KLB_V58_MOVE = (steps) => {
+  if (state.rollStarting || state.rolling || state.moving) return;
+  state.started = true;
+  state.lastRollTotal = Number(steps) || 0;
+  moveToken(state.lastRollTotal);
 };
-rollButton.addEventListener('pointerup', handleRollTap, { passive: false });
 resetButton.addEventListener('click', async () => {
   if ((state.started || state.players.some((player) => (player.lap || 0) > 0 || (player.cash || 0) !== STARTING_CASH)) && !window.confirm('현재 진행을 지우고 처음부터 시작할까요?')) return;
   await resetGame();
