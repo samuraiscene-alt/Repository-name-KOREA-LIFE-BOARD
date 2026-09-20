@@ -1537,17 +1537,17 @@ function checkSettled(now) {
     const av = die.body.angvel();
     const linearSpeed = Math.hypot(lv.x, lv.y, lv.z);
     const angularSpeed = Math.hypot(av.x, av.y, av.z);
-    return linearSpeed < 0.11 && angularSpeed < 0.16 && die.body.translation().y < 1.1;
+    return linearSpeed < 0.18 && angularSpeed < 0.24 && die.body.translation().y < 1.12;
   });
 
   if (quiet) {
     if (!settleSince) settleSince = now;
-    if (now - settleSince > 480) finishRoll();
+    if (now - settleSince > 260) finishRoll();
   } else {
     settleSince = 0;
   }
 
-  if (now - rollStartedAt > 7000) finishRoll();
+  if (now - rollStartedAt > 2800) finishRoll();
 }
 
 function recoverPlayLoop(error, stage = '턴 처리') {
