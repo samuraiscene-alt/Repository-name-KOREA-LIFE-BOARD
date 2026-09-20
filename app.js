@@ -5218,7 +5218,7 @@ hapticToggle?.addEventListener('change', () => {
 window.__KLB_APP_READY__ = true;
 continueGameButton?.addEventListener('click', continueSavedGame);
 newGameButton?.addEventListener('click', startNewGameFromLaunch);
-rollButton.addEventListener('click', rollDice);
+rollButton.addEventListener('click', () => rollDice(false));
 resetButton.addEventListener('click', async () => {
   if ((state.started || state.players.some((player) => (player.lap || 0) > 0 || (player.cash || 0) !== STARTING_CASH)) && !window.confirm('현재 진행을 지우고 처음부터 시작할까요?')) return;
   await resetGame();
