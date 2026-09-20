@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="LIFE BOARD" />
+  <meta name="screen-orientation" content="landscape" />
   <meta name="format-detection" content="telephone=no" />
   <script>
     (function () {
@@ -21,8 +22,15 @@
     })();
   </script>
   <style>
+    html,body{margin:0;background:#07111f}
     html:not(.klb-orientation-ready){background:#07111f}
     html:not(.klb-orientation-ready) body{visibility:hidden}
+    #klbBootCover{
+      position:fixed;inset:0;z-index:2147483647;background:#07111f;
+      opacity:1;pointer-events:none;transition:opacity .12s linear
+    }
+    html.klb-first-frame-ready #klbBootCover{opacity:0}
+    html.klb-first-frame-ready #klbBootCover.klb-boot-gone{display:none}
   </style>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon-v35.png" />
@@ -31,6 +39,7 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+  <div id="klbBootCover" aria-hidden="true"></div>
 <div id="startScreen" class="start-screen" aria-hidden="false">
     <section class="start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
       <div class="start-heading">
@@ -347,6 +356,22 @@
   </main>
 
   <script>
+    (function () {
+      function revealFirstFrame() {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            document.documentElement.classList.add('klb-first-frame-ready');
+            var cover = document.getElementById('klbBootCover');
+            if (cover) window.setTimeout(function () { cover.classList.add('klb-boot-gone'); }, 160);
+          });
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', revealFirstFrame, { once: true });
+      } else {
+        revealFirstFrame();
+      }
+    })();
     window.__KLB_APP_READY__ = false;
     window.setTimeout(function () {
       if (window.__KLB_APP_READY__) return;
