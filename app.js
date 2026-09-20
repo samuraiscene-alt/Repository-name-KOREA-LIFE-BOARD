@@ -1148,7 +1148,12 @@ function configureGame(modeKey, announce = true) {
   if (announce) statusPill.textContent = `${mode.label} 준비 · ${turnPrompt()}`;
 }
 
+function isPortraitViewport() {
+  return window.matchMedia?.('(orientation: portrait)').matches === true;
+}
+
 function idleCameraMode() {
+  if (isPortraitViewport()) return 'overview';
   return state.current?.isAI ? 'overview' : 'follow';
 }
 
@@ -1839,6 +1844,7 @@ function getCameraScale(mode, rollSteps = state.lastRollTotal || 8) {
 
 async function setBoardCamera(mode, position = state.position, animate = true, rollSteps = state.lastRollTotal || 8) {
   if (!boardEl.offsetWidth || !boardViewport.clientWidth) return;
+  if (isPortraitViewport()) mode = 'overview';
   const cell = cells[position];
   if (!cell) return;
 
