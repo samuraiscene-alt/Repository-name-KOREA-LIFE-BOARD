@@ -525,3 +525,101 @@ html.pwa-resuming .board-camera { transition: none !important; }
   .player-chip em{display:none}
   .player-chip span{font-size:7px}
 }
+
+
+/* V41 · PLAYTEST control cleanup + portrait safety */
+.mode-control,
+.save-control,
+.reset-button{
+  display:none!important;
+}
+
+@media (max-height:540px) and (orientation:landscape){
+  .center-overlay{padding-bottom:54px}
+  .roll-button{
+    position:absolute;
+    left:50%;
+    bottom:6px;
+    transform:translateX(-50%);
+    min-width:190px;
+    height:40px;
+    border-radius:13px;
+    z-index:35;
+  }
+  .roll-button:active{transform:translate(-50%,1px) scale(.99)}
+}
+
+@media (orientation:portrait){
+  :root{--cell-size:52px}
+  .game-shell{
+    width:100%;
+    max-width:100%;
+    grid-template-rows:44px minmax(0,1fr);
+    gap:4px;
+    padding:
+      max(6px,env(safe-area-inset-top))
+      max(6px,env(safe-area-inset-right))
+      max(6px,env(safe-area-inset-bottom))
+      max(6px,env(safe-area-inset-left));
+  }
+  .footerbar{display:none!important}
+  .topbar{
+    width:100%;
+    gap:5px;
+    overflow:hidden;
+  }
+  .brand-mark{display:none}
+  .brand strong{font-size:11px}
+  .brand span{display:none!important}
+  .hud{
+    flex:1 1 auto;
+    min-width:0;
+    gap:3px;
+    overflow:hidden;
+  }
+  .hud>div{
+    display:none;
+    flex:1 1 0;
+    min-width:0!important;
+    padding:3px 5px!important;
+    border-radius:8px;
+  }
+  .hud>div:nth-child(1),
+  .hud>div:nth-child(2),
+  .hud>div:nth-child(6){display:grid}
+  .hud span{font-size:6px}
+  .hud strong{font-size:8px;max-width:54px}
+  .game-menu-button{
+    width:34px;
+    min-width:34px;
+    height:32px;
+    padding:0;
+    grid-template-columns:1fr;
+  }
+  .game-menu-button span{display:none}
+  .board-viewport{border-radius:12px}
+  .turn-roster{
+    top:5px;
+    left:5px;
+    max-width:72%;
+    gap:3px;
+  }
+  .player-chip{
+    min-width:94px;
+    padding:4px 6px;
+  }
+  .player-chip em{display:none}
+  .player-chip span{font-size:7px}
+  .center-overlay{padding-bottom:58px}
+  .roll-button{
+    position:absolute;
+    left:50%;
+    bottom:8px;
+    transform:translateX(-50%);
+    min-width:176px;
+    height:42px;
+    border-radius:13px;
+    z-index:35;
+  }
+  .roll-button:active{transform:translate(-50%,1px) scale(.99)}
+}
