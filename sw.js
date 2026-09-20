@@ -1,4 +1,4 @@
-const VERSION = 'klb-v46-rapier-lazy-load';
+const VERSION = 'klb-v47-dice-safe-mode';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
