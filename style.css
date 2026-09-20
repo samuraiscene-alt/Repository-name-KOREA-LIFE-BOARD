@@ -470,3 +470,58 @@ html.pwa-resuming .board-camera { transition: none !important; }
 @media(max-height:430px) and (orientation:landscape){.game-menu-card{width:min(660px,92vw);padding:11px;gap:8px}.game-menu-heading strong{font-size:18px}.game-menu-actions button{min-height:36px}.game-settings{grid-template-columns:auto 1fr 1fr;align-items:center}.game-settings label{padding:2px 8px}.game-menu-status{display:none}}
 /* PLAYTEST hotfix: hidden launch cards must stay hidden before JS boots */
 .saved-game-card[hidden]{display:none!important}
+
+
+/* V40 · iPhone PLAYTEST layout */
+.game-shell,.topbar,.stage,.footerbar,.hud{min-width:0}
+.game-shell{width:100%;max-width:100%}
+.topbar{width:100%;overflow:hidden}
+.brand{flex:0 0 auto}
+.hud{flex:1 1 auto;justify-content:flex-end}
+.game-menu-button{flex:0 0 auto}
+
+@media (max-height:540px) and (orientation:landscape){
+  .game-shell{
+    grid-template-rows:38px minmax(0,1fr);
+    gap:3px;
+    padding:
+      max(4px,env(safe-area-inset-top))
+      max(7px,env(safe-area-inset-right))
+      max(4px,env(safe-area-inset-bottom))
+      max(7px,env(safe-area-inset-left));
+  }
+  .footerbar{display:none!important}
+  .topbar{gap:5px}
+  .brand-mark{display:none}
+  .brand strong{font-size:12px;letter-spacing:.025em}
+  .brand span{display:none!important}
+  .hud{gap:3px;overflow:hidden}
+  .hud>div{
+    flex:0 1 64px;
+    min-width:0!important;
+    padding:3px 5px!important;
+    border-radius:9px;
+  }
+  .hud>div:nth-child(4),
+  .hud>div:nth-child(9),
+  .hud>div:nth-child(10),
+  .hud>div:nth-child(11),
+  .hud>div:nth-child(12),
+  .hud>div:nth-child(13){display:none}
+  .hud span{font-size:6.5px}
+  .hud strong{font-size:9px;max-width:62px}
+  .game-menu-button{
+    min-width:36px;
+    width:36px;
+    height:32px;
+    padding:0;
+    border-radius:9px;
+    grid-template-columns:1fr;
+  }
+  .game-menu-button span{display:none}
+  .board-viewport{border-radius:14px}
+  .turn-roster{top:5px;left:6px;max-width:56%;gap:4px}
+  .player-chip{min-width:112px;padding:4px 6px}
+  .player-chip em{display:none}
+  .player-chip span{font-size:7px}
+}
