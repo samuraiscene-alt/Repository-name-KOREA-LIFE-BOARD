@@ -1,4 +1,4 @@
-const VERSION = 'klb-v45-dice-engine-recovery';
+const VERSION = 'klb-v46-rapier-lazy-load';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
