@@ -1,5 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js';
-import { RoundedBoxGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+import * as THREE from 'https://esm.sh/three@0.186.0';
+import { RoundedBoxGeometry } from 'https://esm.sh/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js';
 import RAPIER from 'https://esm.sh/@dimforge/rapier3d-compat@0.20.0';
 
 const boardViewport = document.querySelector('#boardViewport');
@@ -5161,6 +5161,7 @@ hapticToggle?.addEventListener('change', () => {
   if (menuStatusEl) menuStatusEl.textContent = preferences.haptics ? '진동 피드백을 켰습니다.' : '진동 피드백을 껐습니다.';
 });
 
+window.__KLB_APP_READY__ = true;
 continueGameButton?.addEventListener('click', continueSavedGame);
 newGameButton?.addEventListener('click', startNewGameFromLaunch);
 rollButton.addEventListener('click', rollDice);
