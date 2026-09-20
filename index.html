@@ -341,6 +341,14 @@
     </footer>
   </main>
 
+  <script>
+    window.__KLB_APP_READY__ = false;
+    window.setTimeout(function () {
+      if (window.__KLB_APP_READY__) return;
+      var note = document.getElementById('startScreenNote');
+      if (note) note.textContent = '게임 엔진을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.';
+    }, 7000);
+  </script>
   <script src="./pwa.js" defer></script>
   <script type="module" src="./app.js"></script>
 </body>
