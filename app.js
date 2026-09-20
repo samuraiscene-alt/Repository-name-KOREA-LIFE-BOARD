@@ -1550,6 +1550,23 @@ function checkSettled(now) {
   if (now - rollStartedAt > 7000) finishRoll();
 }
 
+function recoverPlayLoop(error, stage = '턴 처리') {
+  console.error(`${stage} 오류`, error);
+  state.rollStarting = false;
+  state.rolling = false;
+  state.moving = false;
+  boardCamera.classList.remove('following');
+  tokenEl?.classList.remove('in-motion', 'hop', 'landing-bounce');
+  clearRoutePreview();
+  hideMoveProgress();
+  diceCameraMode = 'idle';
+  setDiceIdlePose();
+  updateHud();
+  updateTurnControls();
+  statusPill.textContent = `${stage} 중 오류가 발생했습니다. 다시 진행해주세요.`;
+  if (canPersistGame()) persistGameState('자동저장');
+}
+
 async function rollDice(fromAI = false) {
   if (state.rollStarting || state.rolling || state.moving || !world) return;
   if (state.current?.isAI && !fromAI) return;
@@ -1601,12 +1618,7 @@ async function rollDice(fromAI = false) {
 
     triggerHaptic(18);
   } catch (error) {
-    console.error('주사위 시작 실패', error);
-    state.rollStarting = false;
-    state.rolling = false;
-    diceCameraMode = 'idle';
-    statusPill.textContent = '주사위 준비 중 오류가 발생했습니다. 다시 눌러주세요.';
-    updateTurnControls();
+    recoverPlayLoop(error, '주사위 준비');
   }
 }
 
@@ -1622,21 +1634,25 @@ async function finishRoll() {
   rollButton.disabled = true;
   diceCameraMode = 'settled';
 
-  const values = dice.map((die) => getTopFace(die.mesh.quaternion));
-  const total = values[0] + values[1];
-  state.lastRollTotal = total;
-  dice[0].value = values[0];
-  dice[1].value = values[1];
-  setResultDisplay(values[0], values[1]);
-  statusPill.textContent = `${values[0]} + ${values[1]} = ${total}칸 이동`;
-  playSettleSound();
-  triggerHaptic([18, 30, 18]);
+  try {
+    const values = dice.map((die) => getTopFace(die.mesh.quaternion));
+    const total = values[0] + values[1];
+    state.lastRollTotal = total;
+    dice[0].value = values[0];
+    dice[1].value = values[1];
+    setResultDisplay(values[0], values[1]);
+    statusPill.textContent = `${values[0]} + ${values[1]} = ${total}칸 이동`;
+    playSettleSound();
+    triggerHaptic([18, 30, 18]);
 
-  showRoutePreview(total);
-  await sleep(620);
-  await setBoardCamera('follow', state.position, true, total);
-  await sleep(220);
-  await moveToken(total);
+    showRoutePreview(total);
+    await sleep(620);
+    await setBoardCamera('follow', state.position, true, total);
+    await sleep(220);
+    await moveToken(total);
+  } catch (error) {
+    recoverPlayLoop(error, '이동·이벤트 처리');
+  }
 }
 
 function getTopFace(quaternion) {
@@ -4988,9 +5004,10 @@ function updateHud() {
 }
 
 async function resetGame() {
-  if (state.rolling || state.moving) return;
+  if (state.rollStarting || state.rolling || state.moving) return;
   state.activePlayer = 0;
   state.started = false;
+  state.rollStarting = false;
   state.lastRollTotal = 0;
   state.economyPhase = 'normal';
   state.economyYear = 0;
