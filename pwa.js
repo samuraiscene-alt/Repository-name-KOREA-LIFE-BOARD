@@ -4,8 +4,6 @@
   let resumeTimer = 0;
 
   const stateText = () => document.querySelector('#pwaRuntimeStatus');
-  const orientationHelp = () => document.querySelector('#orientationHelp');
-  const orientationButton = () => document.querySelector('#orientationLockButton');
 
   const setStatus = (text, kind = '') => {
     const el = stateText();
@@ -18,20 +16,8 @@
     return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   }
 
-  function isPortrait() {
-    return window.matchMedia('(orientation: portrait)').matches;
-  }
-
   function updateViewportHeight() {
     root.style.setProperty('--app-height', `${Math.max(1, window.innerHeight)}px`);
-  }
-
-  function updatePortraitGuard() {
-    const guard = document.querySelector('#portraitGuard');
-    if (!guard) return;
-    const portrait = isPortrait();
-    guard.setAttribute('aria-hidden', portrait ? 'false' : 'true');
-    root.classList.toggle('is-portrait', portrait);
   }
 
   function updateConnectionLabel() {
@@ -50,41 +36,31 @@
     clearTimeout(resumeTimer);
     root.classList.add('pwa-resuming');
     updateViewportHeight();
-    updatePortraitGuard();
     resumeTimer = window.setTimeout(() => {
       updateViewportHeight();
-      updatePortraitGuard();
-      root.classList.remove('pwa-resuming');
+        root.classList.remove('pwa-resuming');
       window.dispatchEvent(new CustomEvent('klb:pwaresume', { detail: { reason, hiddenAt } }));
       updateConnectionLabel();
     }, 120);
   }
 
-  async function tryLandscapeLock() {
-    const help = orientationHelp();
+  async function requestLandscapeSilently() {
     try {
-      if (screen.orientation?.lock) {
-        await screen.orientation.lock('landscape');
-        if (help) help.textContent = '가로모드를 요청했습니다. 기기를 가로로 잡아주세요.';
-        return;
-      }
-    } catch (error) {
-      console.info('Orientation lock unavailable:', error);
-    }
-    if (help) help.textContent = '아이폰에서는 제어센터의 세로 화면 방향 고정을 끈 뒤 기기를 가로로 돌려주세요.';
+      if (screen.orientation?.lock) await screen.orientation.lock('landscape');
+    } catch (_) {}
   }
+
+  window.KLB_REQUEST_LANDSCAPE = requestLandscapeSilently;
 
   window.addEventListener('online', updateConnectionLabel, { passive: true });
   window.addEventListener('offline', updateConnectionLabel, { passive: true });
   window.addEventListener('resize', () => {
     updateViewportHeight();
-    updatePortraitGuard();
   }, { passive: true });
   window.addEventListener('orientationchange', () => {
     window.setTimeout(() => {
       updateViewportHeight();
-      updatePortraitGuard();
-    }, 180);
+      }, 180);
   }, { passive: true });
 
   document.addEventListener('visibilitychange', () => {
@@ -108,9 +84,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     updateViewportHeight();
-    updatePortraitGuard();
     updateConnectionLabel();
-    orientationButton()?.addEventListener('click', tryLandscapeLock);
   }, { once: true });
 
   if (!('serviceWorker' in navigator)) {
@@ -119,6 +93,7 @@
   }
 
   window.addEventListener('load', async () => {
+    if (isStandalone()) requestLandscapeSilently();
     try {
       const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
       await navigator.serviceWorker.ready;
