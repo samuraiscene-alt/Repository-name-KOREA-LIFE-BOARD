@@ -1,6 +1,5 @@
 import * as THREE from 'https://esm.sh/three@0.186.0';
 import { RoundedBoxGeometry } from 'https://esm.sh/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js';
-import RAPIER from 'https://esm.sh/@dimforge/rapier3d-compat@0.20.0';
 
 const boardViewport = document.querySelector('#boardViewport');
 const boardCamera = document.querySelector('#boardCamera');
@@ -716,6 +715,7 @@ const boardSpaces = [
 const labels = boardSpaces.map((space) => [space.name, space.family]);
 
 let scene, camera, renderer, world;
+let RAPIER = null;
 let diceEngineInitPromise = null;
 let diceEngineRetryTimer = 0;
 let diceEngineRetryCount = 0;
@@ -1323,6 +1323,10 @@ function ensureDiceEngine() {
 }
 
 async function init3D() {
+  if (!RAPIER) {
+    const rapierModule = await import('https://esm.sh/@dimforge/rapier3d-compat@0.20.0');
+    RAPIER = rapierModule.default || rapierModule;
+  }
   await RAPIER.init();
   world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
   world.timestep = 1 / 60;
