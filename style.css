@@ -623,3 +623,72 @@ html.pwa-resuming .board-camera { transition: none !important; }
   }
   .roll-button:active{transform:translate(-50%,1px) scale(.99)}
 }
+
+
+/* V43 · app-level forced landscape on iPhone */
+html.klb-force-landscape{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  --cell-size:clamp(40px,5.6vh,76px);
+}
+html.klb-force-landscape body{
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:var(--app-width);
+  height:var(--app-height);
+  min-height:0;
+  transform:translate(-50%,-50%) rotate(90deg);
+  transform-origin:center center;
+  overflow:hidden;
+}
+html.klb-force-landscape .game-shell{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  grid-template-rows:38px minmax(0,1fr);
+  gap:3px;
+  padding:4px 7px;
+}
+html.klb-force-landscape .footerbar{display:none!important}
+html.klb-force-landscape .topbar{width:100%;gap:5px;overflow:hidden}
+html.klb-force-landscape .brand-mark{display:none}
+html.klb-force-landscape .brand strong{font-size:12px;letter-spacing:.025em}
+html.klb-force-landscape .brand span{display:none!important}
+html.klb-force-landscape .hud{flex:1 1 auto;min-width:0;gap:3px;overflow:hidden}
+html.klb-force-landscape .hud>div{
+  flex:0 1 64px;
+  min-width:0!important;
+  padding:3px 5px!important;
+  border-radius:9px;
+}
+html.klb-force-landscape .hud>div:nth-child(4),
+html.klb-force-landscape .hud>div:nth-child(9),
+html.klb-force-landscape .hud>div:nth-child(10),
+html.klb-force-landscape .hud>div:nth-child(11),
+html.klb-force-landscape .hud>div:nth-child(12),
+html.klb-force-landscape .hud>div:nth-child(13){display:none}
+html.klb-force-landscape .hud span{font-size:6.5px}
+html.klb-force-landscape .hud strong{font-size:9px;max-width:62px}
+html.klb-force-landscape .game-menu-button{
+  min-width:36px;width:36px;height:32px;padding:0;border-radius:9px;grid-template-columns:1fr;
+}
+html.klb-force-landscape .game-menu-button span{display:none}
+html.klb-force-landscape .board-viewport{border-radius:14px}
+html.klb-force-landscape .turn-roster{top:5px;left:6px;max-width:56%;gap:4px}
+html.klb-force-landscape .player-chip{min-width:112px;padding:4px 6px}
+html.klb-force-landscape .player-chip em{display:none}
+html.klb-force-landscape .player-chip span{font-size:7px}
+html.klb-force-landscape .center-overlay{padding-bottom:54px}
+html.klb-force-landscape .roll-button{
+  position:absolute;
+  left:50%;
+  bottom:6px;
+  transform:translateX(-50%);
+  min-width:190px;
+  height:40px;
+  border-radius:13px;
+  z-index:35;
+}
+html.klb-force-landscape .roll-button:active{transform:translate(-50%,1px) scale(.99)}
