@@ -1178,7 +1178,7 @@ function updateTurnControls() {
   const label = rollButton.querySelector('span:last-child');
   const isAI = Boolean(state.current?.isAI);
   const retired = Boolean(state.current?.retired);
-  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V59';
+  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V60';
   rollButton.disabled = state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
   if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rollStarting || state.rolling || state.moving || isAI || hasBlockingDecision();
 }
