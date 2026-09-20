@@ -1,4 +1,4 @@
-const VERSION = 'klb-v39-playtest1-hotfix1';
+const VERSION = 'klb-v39-playtest1-hotfix2';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
