@@ -716,6 +716,10 @@ const boardSpaces = [
 const labels = boardSpaces.map((space) => [space.name, space.family]);
 
 let scene, camera, renderer, world;
+let diceEngineInitPromise = null;
+let diceEngineRetryTimer = 0;
+let diceEngineRetryCount = 0;
+const DICE_ENGINE_MAX_RETRIES = 3;
 let dice = [];
 let groundBody;
 let animationId = 0;
@@ -742,11 +746,7 @@ requestAnimationFrame(() => {
   setBoardCamera('overview', state.position, false);
 });
 
-init3D().catch((error) => {
-  console.error(error);
-  statusPill.textContent = '3D 엔진을 불러오지 못했습니다. 네트워크를 확인하세요.';
-  rollButton.disabled = true;
-});
+ensureDiceEngine();
 
 function loadPreferences() {
   try {
@@ -1281,6 +1281,45 @@ async function advanceTurn() {
   }
   statusPill.textContent = '모든 플레이어가 회복 중입니다 · 다음 턴을 준비합니다.';
   updateTurnControls();
+}
+
+function ensureDiceEngine() {
+  if (world) {
+    updateTurnControls();
+    return Promise.resolve(true);
+  }
+  if (diceEngineInitPromise) return diceEngineInitPromise;
+
+  rollButton.disabled = true;
+  statusPill.textContent = diceEngineRetryCount > 0
+    ? `3D 주사위 엔진 재연결 중… (${diceEngineRetryCount}/${DICE_ENGINE_MAX_RETRIES})`
+    : '3D 주사위 엔진 준비 중…';
+
+  diceEngineInitPromise = init3D()
+    .then(() => {
+      diceEngineRetryCount = 0;
+      clearTimeout(diceEngineRetryTimer);
+      statusPill.textContent = `${turnPrompt()}`;
+      updateTurnControls();
+      return true;
+    })
+    .catch((error) => {
+      console.error('3D 엔진 초기화 오류', error);
+      diceEngineInitPromise = null;
+      world = undefined;
+      diceEngineRetryCount += 1;
+      rollButton.disabled = true;
+
+      if (diceEngineRetryCount <= DICE_ENGINE_MAX_RETRIES) {
+        statusPill.textContent = '3D 주사위 엔진 연결을 다시 시도합니다…';
+        clearTimeout(diceEngineRetryTimer);
+        diceEngineRetryTimer = window.setTimeout(() => ensureDiceEngine(), 900 * diceEngineRetryCount);
+      } else {
+        statusPill.textContent = '3D 주사위 준비에 실패했습니다. 화면을 다시 열면 자동으로 재시도합니다.';
+      }
+      return false;
+    });
+  return diceEngineInitPromise;
 }
 
 async function init3D() {
@@ -5303,6 +5342,10 @@ window.addEventListener('orientationchange', () => {
 }, { passive: true });
 
 window.addEventListener('klb:pwaresume', () => {
+  if (!world) {
+    diceEngineRetryCount = 0;
+    ensureDiceEngine();
+  }
   requestAnimationFrame(() => {
     resize3D();
     positionAllTokens(false);
