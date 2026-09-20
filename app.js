@@ -652,6 +652,7 @@ const state = {
   economyYear: 0,
   economyCompleted: new Set(),
   rolling: false,
+  rollStarting: false,
   moving: false,
   started: false,
   lastRollTotal: 0,
@@ -765,7 +766,7 @@ function triggerHaptic(pattern) {
 }
 
 function canOpenGameMenu() {
-  return saveEnabled && !state.rolling && !state.moving && !hasBlockingDecision() && !state.current?.isAI;
+  return saveEnabled && !state.rollStarting && !state.rolling && !state.moving && !hasBlockingDecision() && !state.current?.isAI;
 }
 
 function openGameMenu() {
@@ -926,13 +927,13 @@ function hasBlockingDecision() {
 }
 
 function canPersistGame() {
-  return !state.rolling && !state.moving && !hasBlockingDecision();
+  return !state.rollStarting && !state.rolling && !state.moving && !hasBlockingDecision();
 }
 
 function buildSavePayload() {
   return {
     schema: SAVE_SCHEMA_VERSION,
-    appVersion: 38,
+    appVersion: 42,
     savedAt: Date.now(),
     policyVersion: POLICY_KR_2026.id,
     mode: state.mode,
@@ -994,6 +995,7 @@ function restoreGameFromStorage() {
     propertyLeases.fill(null);
     (payload.propertyLeases || []).slice(0, BOARD_CELLS).forEach((value, index) => { propertyLeases[index] = value ? { ...value } : null; });
     pendingAuction = null;
+    state.rollStarting = false;
     state.rolling = false;
     state.moving = false;
     tokenEl = tokenEls[state.activePlayer] ?? tokenEls[0] ?? null;
@@ -1052,6 +1054,7 @@ function configureGame(modeKey, announce = true) {
   state.playerCount = mode.playerCount;
   state.activePlayer = 0;
   state.started = false;
+  state.rollStarting = false;
   state.lastRollTotal = 0;
   state.economyPhase = 'normal';
   state.economyYear = 0;
@@ -1169,8 +1172,8 @@ function updateTurnControls() {
   const isAI = Boolean(state.current?.isAI);
   const retired = Boolean(state.current?.retired);
   if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기';
-  rollButton.disabled = !world || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
-  if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rolling || state.moving || isAI || hasBlockingDecision();
+  rollButton.disabled = !world || state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
+  if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rollStarting || state.rolling || state.moving || isAI || hasBlockingDecision();
 }
 
 function getTransportMode(player) {
@@ -1262,12 +1265,14 @@ async function advanceTurn() {
     }
 
     if (player?.isAI) {
+      persistGameState('자동저장');
       statusPill.textContent = `${player.name} 차례 · 생각 중…`;
       await sleep(720);
       if (!state.rolling && !state.moving && state.current?.isAI) await rollDice(true);
       return;
     }
 
+    persistGameState('자동저장');
     statusPill.textContent = state.mode === 'solo'
       ? `새로운 턴 · ${state.age}세 · 주사위를 던지세요`
       : `${state.current.name} 차례 · 주사위를 던지세요`;
@@ -1546,48 +1551,63 @@ function checkSettled(now) {
 }
 
 async function rollDice(fromAI = false) {
-  if (state.rolling || state.moving || !world) return;
+  if (state.rollStarting || state.rolling || state.moving || !world) return;
   if (state.current?.isAI && !fromAI) return;
   if (!state.current?.isAI && fromAI) return;
+
+  state.rollStarting = true;
   state.started = true;
   gameModeSelect.disabled = true;
-  await ensureAudio();
-  await setBoardCamera('overview', state.position, true);
-  state.rolling = true;
-  settleSince = 0;
-  rollStartedAt = performance.now();
   updateTurnControls();
-  statusPill.textContent = `${state.current.name} · 주사위가 굴러갑니다…`;
-  setResultDisplay(null, null);
-  diceCameraMode = 'rolling';
-  cameraShakeStrength = 0.08;
-  previousVerticalVelocity = [0, 0];
-  playThrowSound();
 
-  const throws = [
-    {
-      pos: { x: -3.1, y: 5.1, z: -1.5 },
-      impulse: { x: 5.15 + Math.random()*1.0, y: 1.75 + Math.random()*.3, z: 3.0 + Math.random()*1.0 },
-      torque: { x: 14+Math.random()*7, y: 20+Math.random()*8, z: 12+Math.random()*7 },
-    },
-    {
-      pos: { x: 3.1, y: 5.25, z: -0.5 },
-      impulse: { x: -5.1-Math.random()*1.0, y: 1.7+Math.random()*.3, z: 2.75+Math.random()*1.1 },
-      torque: { x: -15-Math.random()*7, y: 18+Math.random()*8, z: -14-Math.random()*7 },
-    },
-  ];
+  try {
+    await ensureAudio();
+    await setBoardCamera('overview', state.position, true);
 
-  dice.forEach((die, index) => {
-    const toss = throws[index];
-    die.body.setTranslation(toss.pos, true);
-    die.body.setRotation(randomQuaternion(), true);
-    die.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    die.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
-    die.body.applyImpulse(toss.impulse, true);
-    die.body.applyTorqueImpulse(toss.torque, true);
-  });
+    state.rollStarting = false;
+    state.rolling = true;
+    settleSince = 0;
+    rollStartedAt = performance.now();
+    updateTurnControls();
+    statusPill.textContent = `${state.current.name} · 주사위가 굴러갑니다…`;
+    setResultDisplay(null, null);
+    diceCameraMode = 'rolling';
+    cameraShakeStrength = 0.08;
+    previousVerticalVelocity = [0, 0];
+    playThrowSound();
 
-  triggerHaptic(18);
+    const throws = [
+      {
+        pos: { x: -3.1, y: 5.1, z: -1.5 },
+        impulse: { x: 5.15 + Math.random()*1.0, y: 1.75 + Math.random()*.3, z: 3.0 + Math.random()*1.0 },
+        torque: { x: 14+Math.random()*7, y: 20+Math.random()*8, z: 12+Math.random()*7 },
+      },
+      {
+        pos: { x: 3.1, y: 5.25, z: -0.5 },
+        impulse: { x: -5.1-Math.random()*1.0, y: 1.7+Math.random()*.3, z: 2.75+Math.random()*1.1 },
+        torque: { x: -15-Math.random()*7, y: 18+Math.random()*8, z: -14-Math.random()*7 },
+      },
+    ];
+
+    dice.forEach((die, index) => {
+      const toss = throws[index];
+      die.body.setTranslation(toss.pos, true);
+      die.body.setRotation(randomQuaternion(), true);
+      die.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+      die.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      die.body.applyImpulse(toss.impulse, true);
+      die.body.applyTorqueImpulse(toss.torque, true);
+    });
+
+    triggerHaptic(18);
+  } catch (error) {
+    console.error('주사위 시작 실패', error);
+    state.rollStarting = false;
+    state.rolling = false;
+    diceCameraMode = 'idle';
+    statusPill.textContent = '주사위 준비 중 오류가 발생했습니다. 다시 눌러주세요.';
+    updateTurnControls();
+  }
 }
 
 function randomQuaternion() {
