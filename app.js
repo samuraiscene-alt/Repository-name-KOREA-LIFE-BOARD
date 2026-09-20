@@ -5311,9 +5311,12 @@ hapticToggle?.addEventListener('change', () => {
 });
 
 window.__KLB_APP_READY__ = true;
+window.KLB_ROLL_NOW = () => rollDice(false);
 continueGameButton?.addEventListener('click', continueSavedGame);
 newGameButton?.addEventListener('click', startNewGameFromLaunch);
-rollButton.addEventListener('click', () => rollDice(false));
+rollButton.addEventListener('click', (event) => {
+  if (event.detail === 0) rollDice(false);
+});
 resetButton.addEventListener('click', async () => {
   if ((state.started || state.players.some((player) => (player.lap || 0) > 0 || (player.cash || 0) !== STARTING_CASH)) && !window.confirm('현재 진행을 지우고 처음부터 시작할까요?')) return;
   await resetGame();
