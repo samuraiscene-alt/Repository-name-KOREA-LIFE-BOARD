@@ -17,7 +17,13 @@
   }
 
   function updateViewportHeight() {
-    root.style.setProperty('--app-height', `${Math.max(1, window.innerHeight)}px`);
+    const width = Math.max(1, window.innerWidth);
+    const height = Math.max(1, window.innerHeight);
+    const forceLandscape = height > width;
+
+    root.classList.toggle('klb-force-landscape', forceLandscape);
+    root.style.setProperty('--app-width', `${forceLandscape ? height : width}px`);
+    root.style.setProperty('--app-height', `${forceLandscape ? width : height}px`);
   }
 
   function updateConnectionLabel() {
