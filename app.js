@@ -1178,7 +1178,7 @@ function updateTurnControls() {
   const label = rollButton.querySelector('span:last-child');
   const isAI = Boolean(state.current?.isAI);
   const retired = Boolean(state.current?.retired);
-  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V58';
+  if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기 · V59';
   rollButton.disabled = state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
   if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rollStarting || state.rolling || state.moving || isAI || hasBlockingDecision();
 }
@@ -5327,20 +5327,40 @@ hapticToggle?.addEventListener('change', () => {
 window.__KLB_BOOT_STAGE__ = 'EVENT_BINDING';
 window.__KLB_APP_READY__ = true;
 window.__KLB_BOOT_STAGE__ = 'APP_READY';
-window.KLB_ROLL_NOW = () => rollDice(false);
 continueGameButton?.addEventListener('click', continueSavedGame);
 newGameButton?.addEventListener('click', startNewGameFromLaunch);
 
 // V57: iOS touch probe + direct fallback.
 // Run the logic-only dice path first so rolling never depends on WebGL/Rapier.
-rollButton.removeAttribute('onclick');
-// V58: inline HTML owns the click so we can isolate iOS input from module execution.
-window.KLB_V58_MOVE = (steps) => {
-  if (state.rollStarting || state.rolling || state.moving) return;
+// V59: one canonical play loop. 3D rendering is visual only; game progress never depends on it.
+async function playTurnFromButton() {
+  if (state.rollStarting || state.rolling || state.moving || gameMenuOpen) return;
+  if (!state.current || state.current.isAI || state.current.retired || allPlayersRetired()) return;
+
+  state.rollStarting = true;
   state.started = true;
-  state.lastRollTotal = Number(steps) || 0;
-  moveToken(state.lastRollTotal);
-};
+  gameModeSelect.disabled = true;
+  updateTurnControls();
+
+  const a = Math.floor(Math.random() * 6) + 1;
+  const b = Math.floor(Math.random() * 6) + 1;
+  const total = a + b;
+  state.lastRollTotal = total;
+  setResultDisplay(a, b);
+  statusPill.textContent = `${a} + ${b} = ${total}칸 이동`;
+  triggerHaptic([18, 30, 18]);
+
+  state.rollStarting = false;
+  updateTurnControls();
+  showRoutePreview(total);
+  await sleep(180);
+  await moveToken(total);
+}
+
+rollButton.addEventListener('click', () => {
+  playTurnFromButton().catch((error) => recoverPlayLoop(error, '주사위 턴'));
+});
+window.KLB_ROLL_NOW = () => playTurnFromButton();
 resetButton.addEventListener('click', async () => {
   if ((state.started || state.players.some((player) => (player.lap || 0) > 0 || (player.cash || 0) !== STARTING_CASH)) && !window.confirm('현재 진행을 지우고 처음부터 시작할까요?')) return;
   await resetGame();
