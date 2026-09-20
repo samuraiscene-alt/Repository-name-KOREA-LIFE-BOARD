@@ -692,3 +692,19 @@ html.klb-force-landscape .roll-button{
   z-index:35;
 }
 html.klb-force-landscape .roll-button:active{transform:translate(-50%,1px) scale(.99)}
+
+
+/* V60 · iPhone forced-landscape hit-test repair
+   Keep the visual board camera, but make the center controls their own composited
+   hit-test layer above the WebGL canvas. */
+.center-zone{isolation:isolate}
+.dice-scene{z-index:1;pointer-events:none}
+.dice-scene canvas{pointer-events:none!important}
+.center-overlay{z-index:120;pointer-events:none;transform:translateZ(1px)}
+.center-overlay .roll-button{
+  z-index:160!important;
+  pointer-events:auto!important;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
