@@ -1,4 +1,4 @@
-const VERSION = 'klb-v42-playloop1-hotfix2';
+const VERSION = 'klb-v43-landscape-dice1';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
