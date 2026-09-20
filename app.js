@@ -933,7 +933,7 @@ function canPersistGame() {
 function buildSavePayload() {
   return {
     schema: SAVE_SCHEMA_VERSION,
-    appVersion: 42,
+    appVersion: 43,
     savedAt: Date.now(),
     policyVersion: POLICY_KR_2026.id,
     mode: state.mode,
@@ -1152,7 +1152,7 @@ function configureGame(modeKey, announce = true) {
 }
 
 function isPortraitViewport() {
-  return window.matchMedia?.('(orientation: portrait)').matches === true;
+  return false;
 }
 
 function idleCameraMode() {
@@ -1363,11 +1363,22 @@ function addPhysicsWalls() {
     { x: 0, z: 5.5, hx: 7.5, hz: 0.12 },
   ];
   walls.forEach((wall) => {
-    const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(wall.x, 0.55, wall.z));
+    const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(wall.x, 5.0, wall.z));
     world.createCollider(
-      RAPIER.ColliderDesc.cuboid(wall.hx, 0.8, wall.hz).setRestitution(0.28).setFriction(0.64),
+      RAPIER.ColliderDesc.cuboid(wall.hx, 5.5, wall.hz).setRestitution(0.18).setFriction(0.72),
       rb
     );
+  });
+}
+
+function keepDiceInArena() {
+  dice.forEach((die, index) => {
+    const p = die.body.translation();
+    if (Math.abs(p.x) <= 6.55 && Math.abs(p.z) <= 4.55 && p.y >= -0.8 && p.y <= 8.2) return;
+
+    die.body.setTranslation({ x: index === 0 ? -1.35 : 1.35, y: 2.8, z: 0.15 }, true);
+    die.body.setLinvel({ x: index === 0 ? 0.8 : -0.8, y: -0.7, z: 0.35 }, true);
+    die.body.setAngvel({ x: index === 0 ? 3.4 : -3.4, y: 4.2, z: 2.6 }, true);
   });
 }
 
@@ -1464,6 +1475,7 @@ function animate(now) {
   if (world) {
     const substeps = Math.max(1, Math.round(elapsed / (1 / 60)));
     for (let i = 0; i < substeps; i++) world.step();
+    if (state.rolling) keepDiceInArena();
 
     dice.forEach((die, index) => {
       const translation = die.body.translation();
@@ -1595,14 +1607,14 @@ async function rollDice(fromAI = false) {
 
     const throws = [
       {
-        pos: { x: -3.1, y: 5.1, z: -1.5 },
-        impulse: { x: 5.15 + Math.random()*1.0, y: 1.75 + Math.random()*.3, z: 3.0 + Math.random()*1.0 },
-        torque: { x: 14+Math.random()*7, y: 20+Math.random()*8, z: 12+Math.random()*7 },
+        pos: { x: -2.35, y: 3.9, z: -0.9 },
+        impulse: { x: 3.55 + Math.random()*0.7, y: 1.15 + Math.random()*.22, z: 2.05 + Math.random()*0.7 },
+        torque: { x: 10+Math.random()*5, y: 14+Math.random()*6, z: 9+Math.random()*5 },
       },
       {
-        pos: { x: 3.1, y: 5.25, z: -0.5 },
-        impulse: { x: -5.1-Math.random()*1.0, y: 1.7+Math.random()*.3, z: 2.75+Math.random()*1.1 },
-        torque: { x: -15-Math.random()*7, y: 18+Math.random()*8, z: -14-Math.random()*7 },
+        pos: { x: 2.35, y: 4.0, z: -0.35 },
+        impulse: { x: -3.55-Math.random()*0.7, y: 1.12+Math.random()*.22, z: 1.95+Math.random()*0.75 },
+        torque: { x: -10-Math.random()*5, y: 13+Math.random()*6, z: -9-Math.random()*5 },
       },
     ];
 
