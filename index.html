@@ -36,11 +36,11 @@
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon-v35.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/apple-touch-icon-v35.png" />
   <title>KOREA LIFE BOARD - PWA PLAYTEST 1</title>
-  <link rel="stylesheet" href="./style.css?v=58" />
+  <link rel="stylesheet" href="./style.css?v=59" />
 </head>
 <body>
   <div id="klbBootCover" aria-hidden="true"></div>
-<div id="v55Proof" style="position:fixed;top:8px;left:8px;z-index:2147483646;background:#ff2d55;color:white;padding:6px 10px;border-radius:8px;font:700 14px -apple-system,sans-serif">V58 LIVE</div>
+<div id="v55Proof" style="position:fixed;top:8px;left:8px;z-index:2147483646;background:#ff2d55;color:white;padding:6px 10px;border-radius:8px;font:700 14px -apple-system,sans-serif">V59 LIVE</div>
 <div id="startScreen" class="start-screen" aria-hidden="false">
     <section class="start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
       <div class="start-heading">
@@ -138,7 +138,7 @@
             <div class="center-zone">
               <div id="diceScene" class="dice-scene" aria-label="3D dice area"></div>
               <div class="center-overlay">
-                <div class="status-pill" id="statusPill">V58 LIVE · HTML 최신본</div>
+                <div class="status-pill" id="statusPill">V59 LIVE · HTML 최신본</div>
                 <div class="result" id="diceResult" aria-live="polite">
                   <span class="mini-die">–</span>
                   <span class="plus">+</span>
@@ -148,27 +148,8 @@
                 </div>
                 <button id="rollButton" class="roll-button" type="button">
                   <span class="dice-icon">⚄</span>
-                  <span>주사위 던지기 · V58</span>
+                  <span>주사위 던지기 · V59</span>
                 </button>
-                <script>
-                  // V58 inline control: proves/handles iOS tap without depending on app.js.
-                  (function () {
-                    var b = document.getElementById('rollButton');
-                    var result = document.getElementById('diceResult');
-                    var status = document.getElementById('statusPill');
-                    if (!b) return;
-                    b.addEventListener('click', function () {
-                      var a = Math.floor(Math.random() * 6) + 1;
-                      var d = Math.floor(Math.random() * 6) + 1;
-                      var parts = result && result.querySelectorAll('.mini-die');
-                      if (parts && parts.length >= 2) { parts[0].textContent = a; parts[1].textContent = d; }
-                      var total = result && result.querySelector('strong');
-                      if (total) total.textContent = String(a + d);
-                      if (status) status.textContent = 'V58 · 버튼 입력 성공 · ' + a + ' + ' + d + ' = ' + (a + d);
-                      if (window.KLB_V58_MOVE) window.KLB_V58_MOVE(a + d);
-                    });
-                  })();
-                </script>
                 <div class="mode-control">
                   <label for="gameModeSelect">게임 모드</label>
                   <select id="gameModeSelect" aria-label="게임 모드">
@@ -430,6 +411,6 @@
       }).catch(function () {});
     }
   </script>
-  <script type="module" src="./app.js?v=58"></script>
+  <script type="module" src="./app.js?v=59"></script>
 </body>
 </html>
