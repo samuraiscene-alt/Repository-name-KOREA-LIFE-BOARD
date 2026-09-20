@@ -1,4 +1,4 @@
-const VERSION = 'klb-v50-boot-diagnostics';
+const VERSION = 'klb-v51-deployment-fingerprint';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
