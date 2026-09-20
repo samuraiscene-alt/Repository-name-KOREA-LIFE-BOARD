@@ -8,6 +8,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="LIFE BOARD" />
   <meta name="format-detection" content="telephone=no" />
+  <script>
+    (function () {
+      var w = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+      var h = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+      var forceLandscape = h > w;
+      var root = document.documentElement;
+      root.classList.toggle('klb-force-landscape', forceLandscape);
+      root.style.setProperty('--app-width', (forceLandscape ? h : w) + 'px');
+      root.style.setProperty('--app-height', (forceLandscape ? w : h) + 'px');
+      root.classList.add('klb-orientation-ready');
+    })();
+  </script>
+  <style>
+    html:not(.klb-orientation-ready){background:#07111f}
+    html:not(.klb-orientation-ready) body{visibility:hidden}
+  </style>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon-v35.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/apple-touch-icon-v35.png" />
