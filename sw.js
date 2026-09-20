@@ -9,9 +9,6 @@ const CORE_ASSETS = [
   './pwa.js',
   './manifest.webmanifest',
   './icons/apple-touch-icon-v35.png',
-  './icons/icon-192-v35.png',
-  './icons/icon-512-v35.png',
-  './icons/icon-1024-v35.png'
 ];
 
 self.addEventListener('install', (event) => {
