@@ -882,7 +882,7 @@ async function continueSavedGame() {
   setSaveStatus('복원 완료');
   requestAnimationFrame(() => {
     positionAllTokens(false);
-    setBoardCamera('overview', state.position, false);
+    setBoardCamera(idleCameraMode(), state.position, false, 6);
   });
 }
 
@@ -899,7 +899,7 @@ async function startNewGameFromLaunch() {
   hideStartScreen();
   updateTurnControls();
   statusPill.textContent = `${GAME_MODES[modeKey].label} · ${turnPrompt()}`;
-  await setBoardCamera('overview', state.position, true);
+  await setBoardCamera(idleCameraMode(), state.position, true, 6);
 }
 
 function setSaveStatus(text) {
@@ -1148,6 +1148,10 @@ function configureGame(modeKey, announce = true) {
   if (announce) statusPill.textContent = `${mode.label} 준비 · ${turnPrompt()}`;
 }
 
+function idleCameraMode() {
+  return state.current?.isAI ? 'overview' : 'follow';
+}
+
 function turnPrompt() {
   if (!state.current) return '주사위를 던져보세요';
   if (state.current.isAI) return `${state.current.name} 차례`;
@@ -1262,6 +1266,7 @@ async function advanceTurn() {
     statusPill.textContent = state.mode === 'solo'
       ? `새로운 턴 · ${state.age}세 · 주사위를 던지세요`
       : `${state.current.name} 차례 · 주사위를 던지세요`;
+    await setBoardCamera('follow', state.position, true, 6);
     return;
   }
   statusPill.textContent = '모든 플레이어가 회복 중입니다 · 다음 턴을 준비합니다.';
@@ -5043,7 +5048,7 @@ async function resetGame() {
   statusPill.textContent = `${GAME_MODES[state.mode].label} · ${turnPrompt()}`;
   clearSavedGame();
   persistGameState('새 게임', true);
-  await setBoardCamera('overview', state.position, true);
+  await setBoardCamera(idleCameraMode(), state.position, true, 6);
 }
 
 async function ensureAudio() {
@@ -5229,16 +5234,16 @@ gameModeSelect.addEventListener('change', () => {
     return;
   }
   configureGame(gameModeSelect.value);
-  requestAnimationFrame(() => setBoardCamera('overview', state.position, false));
+  requestAnimationFrame(() => setBoardCamera(idleCameraMode(), state.position, false, 6));
 });
 window.addEventListener('resize', () => {
   positionAllTokens(false);
-  setBoardCamera('overview', state.position, false);
+  setBoardCamera(idleCameraMode(), state.position, false, 6);
 }, { passive: true });
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
     positionAllTokens(false);
-    setBoardCamera('overview', state.position, false);
+    setBoardCamera(idleCameraMode(), state.position, false, 6);
   }, 280);
 }, { passive: true });
 
@@ -5248,7 +5253,7 @@ window.addEventListener('klb:pwaresume', () => {
     positionAllTokens(false);
     updateHud();
     renderRoster();
-    setBoardCamera('overview', state.position, false);
+    setBoardCamera(idleCameraMode(), state.position, false, 6);
   });
 });
 
