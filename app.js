@@ -716,6 +716,7 @@ const labels = boardSpaces.map((space) => [space.name, space.family]);
 
 let scene, camera, renderer, world;
 let RAPIER = null;
+let diceFallbackMode = false;
 let diceEngineInitPromise = null;
 let diceEngineRetryTimer = 0;
 let diceEngineRetryCount = 0;
@@ -1172,7 +1173,7 @@ function updateTurnControls() {
   const isAI = Boolean(state.current?.isAI);
   const retired = Boolean(state.current?.retired);
   if (label) label.textContent = allPlayersRetired() ? '인생 완료' : retired ? '은퇴 완료' : isAI ? 'AI 턴 진행 중' : '주사위 던지기';
-  rollButton.disabled = !world || state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
+  rollButton.disabled = state.rollStarting || state.rolling || state.moving || isAI || retired || allPlayersRetired() || gameMenuOpen;
   if (gameMenuButton) gameMenuButton.disabled = !saveEnabled || state.rollStarting || state.rolling || state.moving || isAI || hasBlockingDecision();
 }
 
@@ -1298,6 +1299,7 @@ function ensureDiceEngine() {
   diceEngineInitPromise = init3D()
     .then(() => {
       diceEngineRetryCount = 0;
+      diceFallbackMode = false;
       clearTimeout(diceEngineRetryTimer);
       statusPill.textContent = `${turnPrompt()}`;
       updateTurnControls();
@@ -1308,7 +1310,8 @@ function ensureDiceEngine() {
       diceEngineInitPromise = null;
       world = undefined;
       diceEngineRetryCount += 1;
-      rollButton.disabled = true;
+      diceFallbackMode = true;
+      updateTurnControls();
 
       if (diceEngineRetryCount <= DICE_ENGINE_MAX_RETRIES) {
         statusPill.textContent = '3D 주사위 엔진 연결을 다시 시도합니다…';
@@ -1623,7 +1626,11 @@ function recoverPlayLoop(error, stage = '턴 처리') {
 }
 
 async function rollDice(fromAI = false) {
-  if (state.rollStarting || state.rolling || state.moving || !world) return;
+  if (state.rollStarting || state.rolling || state.moving) return;
+  if (!world) {
+    await rollDiceFallback(fromAI);
+    return;
+  }
   if (state.current?.isAI && !fromAI) return;
   if (!state.current?.isAI && fromAI) return;
 
@@ -1674,6 +1681,39 @@ async function rollDice(fromAI = false) {
     triggerHaptic(18);
   } catch (error) {
     recoverPlayLoop(error, '주사위 준비');
+  }
+}
+
+async function rollDiceFallback(fromAI = false) {
+  if (state.current?.isAI && !fromAI) return;
+  if (!state.current?.isAI && fromAI) return;
+
+  state.rollStarting = true;
+  state.started = true;
+  gameModeSelect.disabled = true;
+  updateTurnControls();
+
+  try {
+    const values = [
+      Math.floor(Math.random() * 6) + 1,
+      Math.floor(Math.random() * 6) + 1,
+    ];
+    const total = values[0] + values[1];
+    state.lastRollTotal = total;
+    setResultDisplay(values[0], values[1]);
+    statusPill.textContent = `${values[0]} + ${values[1]} = ${total}칸 이동 · 2D 안전모드`;
+    triggerHaptic([18, 30, 18]);
+    state.rollStarting = false;
+    state.moving = true;
+    updateTurnControls();
+
+    showRoutePreview(total);
+    await sleep(420);
+    await setBoardCamera('follow', state.position, true, total);
+    await sleep(160);
+    await moveToken(total);
+  } catch (error) {
+    recoverPlayLoop(error, '안전모드 이동·이벤트 처리');
   }
 }
 
