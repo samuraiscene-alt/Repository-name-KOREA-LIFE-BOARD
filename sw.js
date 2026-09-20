@@ -1,4 +1,4 @@
-const VERSION = 'klb-v47-dice-safe-mode';
+const VERSION = 'klb-v48-roll-unlock';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
