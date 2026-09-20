@@ -36,7 +36,7 @@
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon-v35.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/apple-touch-icon-v35.png" />
   <title>KOREA LIFE BOARD - PWA PLAYTEST 1</title>
-  <link rel="stylesheet" href="./style.css?v=53" />
+  <link rel="stylesheet" href="./style.css?v=54" />
 </head>
 <body>
   <div id="klbBootCover" aria-hidden="true"></div>
@@ -137,7 +137,7 @@
             <div class="center-zone">
               <div id="diceScene" class="dice-scene" aria-label="3D dice area"></div>
               <div class="center-overlay">
-                <div class="status-pill" id="statusPill">V53 코어 복구 · HTML 최신본 로드됨</div>
+                <div class="status-pill" id="statusPill">V54 직접 실행 · HTML 최신본 로드됨</div>
                 <div class="result" id="diceResult" aria-live="polite">
                   <span class="mini-die">–</span>
                   <span class="plus">+</span>
@@ -147,7 +147,7 @@
                 </div>
                 <button id="rollButton" class="roll-button" type="button" onclick="window.KLB_ROLL_NOW && window.KLB_ROLL_NOW()">
                   <span class="dice-icon">⚄</span>
-                  <span>주사위 던지기 · V53</span>
+                  <span>주사위 던지기 · V54</span>
                 </button>
                 <div class="mode-control">
                   <label for="gameModeSelect">게임 모드</label>
@@ -396,7 +396,20 @@
       if (note) note.textContent = '게임 엔진을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.';
     }, 7000);
   </script>
-  <script src="./pwa.js?v=53" defer></script>
-  <script type="module" src="./app.js?v=53"></script>
+  <script>
+    // V54: retire every previously registered worker/cache before normal play.
+    // The game is network-first during diagnosis so an old app shell cannot mask deployments.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+      }).catch(function () {});
+    }
+    if ('caches' in window) {
+      caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+      }).catch(function () {});
+    }
+  </script>
+  <script type="module" src="./app.js?v=54"></script>
 </body>
 </html>
