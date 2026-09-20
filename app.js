@@ -1,3 +1,4 @@
+window.__KLB_BOOT_STAGE__ = 'APP_MODULE_START';
 import * as THREE from 'https://esm.sh/three@0.186.0';
 import { RoundedBoxGeometry } from 'https://esm.sh/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js';
 
@@ -737,8 +738,11 @@ let cameraShakeStrength = 0;
 const diceCameraTarget = new THREE.Vector3(0, 0.35, 0);
 const diceCameraDesiredPos = new THREE.Vector3(0, 8.2, 11.5);
 
+window.__KLB_BOOT_STAGE__ = 'BEFORE_RENDER_BOARD';
 renderBoard();
+window.__KLB_BOOT_STAGE__ = 'AFTER_RENDER_BOARD';
 configureGame('solo', false);
+window.__KLB_BOOT_STAGE__ = 'AFTER_CONFIGURE_GAME';
 saveEnabled = false;
 const launchSaveSummary = getSavedGameSummary();
 showStartScreen(launchSaveSummary);
@@ -747,7 +751,9 @@ requestAnimationFrame(() => {
   setBoardCamera('overview', state.position, false);
 });
 
+window.__KLB_BOOT_STAGE__ = 'BEFORE_DICE_ENGINE';
 ensureDiceEngine();
+window.__KLB_BOOT_STAGE__ = 'AFTER_DICE_ENGINE_CALL';
 
 function loadPreferences() {
   try {
@@ -5310,7 +5316,9 @@ hapticToggle?.addEventListener('change', () => {
   if (menuStatusEl) menuStatusEl.textContent = preferences.haptics ? '진동 피드백을 켰습니다.' : '진동 피드백을 껐습니다.';
 });
 
+window.__KLB_BOOT_STAGE__ = 'EVENT_BINDING';
 window.__KLB_APP_READY__ = true;
+window.__KLB_BOOT_STAGE__ = 'APP_READY';
 window.KLB_ROLL_NOW = () => rollDice(false);
 continueGameButton?.addEventListener('click', continueSavedGame);
 newGameButton?.addEventListener('click', startNewGameFromLaunch);
