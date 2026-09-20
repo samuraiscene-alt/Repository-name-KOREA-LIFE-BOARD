@@ -98,6 +98,9 @@
     return;
   }
 
+  /* V54 diagnostic: service-worker registration is temporarily disabled. */
+  return;
+
   window.addEventListener('load', async () => {
     if (isStandalone()) requestLandscapeSilently();
     try {
