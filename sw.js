@@ -1,4 +1,4 @@
-const VERSION = 'klb-v43-landscape-dice2';
+const VERSION = 'klb-v44-first-frame-landscape';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
