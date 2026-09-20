@@ -1,6 +1,6 @@
 window.__KLB_BOOT_STAGE__ = 'APP_MODULE_START';
-import * as THREE from 'https://esm.sh/three@0.186.0';
-import { RoundedBoxGeometry } from 'https://esm.sh/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+let THREE = null;
+let RoundedBoxGeometry = null;
 
 const boardViewport = document.querySelector('#boardViewport');
 const boardCamera = document.querySelector('#boardCamera');
@@ -735,8 +735,8 @@ let lastImpactAt = [0, 0];
 let previousVerticalVelocity = [0, 0];
 let diceCameraMode = 'idle';
 let cameraShakeStrength = 0;
-const diceCameraTarget = new THREE.Vector3(0, 0.35, 0);
-const diceCameraDesiredPos = new THREE.Vector3(0, 8.2, 11.5);
+let diceCameraTarget = null;
+let diceCameraDesiredPos = null;
 
 window.__KLB_BOOT_STAGE__ = 'BEFORE_RENDER_BOARD';
 renderBoard();
@@ -1332,10 +1332,18 @@ function ensureDiceEngine() {
 }
 
 async function init3D() {
-  if (!RAPIER) {
-    const rapierModule = await import('https://esm.sh/@dimforge/rapier3d-compat@0.20.0');
+  if (!THREE || !RoundedBoxGeometry || !RAPIER) {
+    const [threeModule, roundedModule, rapierModule] = await Promise.all([
+      import('https://esm.sh/three@0.186.0'),
+      import('https://esm.sh/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js'),
+      import('https://esm.sh/@dimforge/rapier3d-compat@0.20.0'),
+    ]);
+    THREE = threeModule;
+    RoundedBoxGeometry = roundedModule.RoundedBoxGeometry;
     RAPIER = rapierModule.default || rapierModule;
   }
+  diceCameraTarget ||= new THREE.Vector3(0, 0.35, 0);
+  diceCameraDesiredPos ||= new THREE.Vector3(0, 8.2, 11.5);
   await RAPIER.init();
   world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
   world.timestep = 1 / 60;
