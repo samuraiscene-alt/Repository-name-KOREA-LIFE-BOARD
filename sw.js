@@ -1,4 +1,4 @@
-const VERSION = 'klb-v49-direct-roll-tap';
+const VERSION = 'klb-v50-boot-diagnostics';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
