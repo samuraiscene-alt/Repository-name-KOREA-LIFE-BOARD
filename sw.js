@@ -1,9 +1,7 @@
-const VERSION = 'klb-v52-core-dice-recovery';
+const VERSION = 'klb-v53-navigation-cache-bypass';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
-  './',
-  './index.html',
   './style.css',
   './app.js',
   './pwa.js',
@@ -29,9 +27,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-async function networkFirst(request, fallbackUrl = null) {
+async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-store' });
     if (response && (response.ok || response.type === 'opaque')) {
       const cache = await caches.open(RUNTIME_CACHE);
       cache.put(request, response.clone());
@@ -40,10 +38,6 @@ async function networkFirst(request, fallbackUrl = null) {
   } catch (error) {
     const cached = await caches.match(request);
     if (cached) return cached;
-    if (fallbackUrl) {
-      const fallback = await caches.match(fallbackUrl);
-      if (fallback) return fallback;
-    }
     throw error;
   }
 }
@@ -66,8 +60,10 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
 
+  // HTML navigations must never fall back to an old cached index.html.
+  // This prevents stale app shells from surviving a successful Pages deploy.
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, './index.html'));
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
@@ -76,6 +72,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Three.js / Rapier 같은 외부 3D 의존성은 첫 제어 실행 때 캐시됩니다.
+  // External 3D dependencies are cached only after a successful fetch.
   event.respondWith(cacheFirst(request));
 });
