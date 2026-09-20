@@ -864,7 +864,12 @@ function hideStartScreen() {
   startScreenEl.setAttribute('aria-hidden', 'true');
 }
 
+function requestLandscapeForGame() {
+  try { window.KLB_REQUEST_LANDSCAPE?.(); } catch (_) {}
+}
+
 async function continueSavedGame() {
+  requestLandscapeForGame();
   if (!restoreGameFromStorage()) {
     showStartScreen(null);
     if (startScreenNoteEl) startScreenNoteEl.textContent = '저장 데이터를 읽지 못했습니다. 새 게임을 시작해주세요.';
@@ -882,6 +887,7 @@ async function continueSavedGame() {
 }
 
 async function startNewGameFromLaunch() {
+  requestLandscapeForGame();
   const existing = getSavedGameSummary();
   if (existing && !window.confirm('저장된 게임을 지우고 새 게임을 시작할까요?')) return;
   const modeKey = GAME_MODES[startModeSelect?.value] ? startModeSelect.value : 'solo';
