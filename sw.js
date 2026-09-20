@@ -1,4 +1,4 @@
-const VERSION = 'klb-v51-deployment-fingerprint';
+const VERSION = 'klb-v52-core-dice-recovery';
 const CORE_CACHE = `${VERSION}-core`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const CORE_ASSETS = [
